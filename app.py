@@ -17,10 +17,7 @@ with open('df.pkl', 'rb') as f:
 with open('word2vec_model.pkl', 'rb') as f:
     loaded_model = pickle.load(f)
 
-# Define the function for recommending articles based on input
 def recommend_article_based_on_input(user_input, loaded_model, df, num_similar_items):
-    vocabulary = loaded_model.wv.key_to_index
-    
     # Concatenate relevant text columns
     combined_text = df['title'] + " " + df['description'] + " " + df['content']
     
@@ -37,10 +34,17 @@ def recommend_article_based_on_input(user_input, loaded_model, df, num_similar_i
     # Get indices of most similar articles
     indices = np.argsort(cosine_similarities)[:num_similar_items]
 
-    # Extract recommended articles and URLs
+    # Extract recommended articles information
     recommended_articles = []
     for index in indices:
-        recommended_articles.append((df['title'][index], df['url'][index]))
+        article_info = {
+            'title': df['title'][index],
+            'link': df['url'][index],
+            'description': df['description'][index],
+            'author': df['author'][index],
+            'year': pd.to_datetime(df['published_at'][index]).year  # Extract year from published_at
+        }
+        recommended_articles.append(article_info)
 
     return recommended_articles
 
